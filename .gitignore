@@ -60,6 +60,8 @@ data/embeddings/
 !data/samples/**/*.txt
 !data/samples/**/*.md
 
+*.hdf5
+
 # Model files
 models/
 *.bin

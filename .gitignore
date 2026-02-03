@@ -48,6 +48,18 @@ data/*.pt
 data/*.pth
 data/raw/
 data/processed/
+data/edo/*.txt
+data/meiji/*.txt
+data/embeddings/
+*.hdf5
+
+# Exception: Keep sample files and metadata
+!data/target_words.csv
+!data/TARGET_WORDS_METADATA.md
+!data/samples/
+!data/samples/**/*.txt
+!data/samples/**/*.md
+
 *.hdf5
 
 # Model files

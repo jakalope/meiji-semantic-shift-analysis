@@ -120,6 +120,70 @@ The pipeline produces:
 - Statistical test results (t-test or Mann-Whitney U)
 - t-SNE plots of embeddings for selected words showing semantic clustering
 
+## Methodological Considerations
+
+### Data Quality and Normalization
+
+**Orthographic Variation**: Edo-period texts often use historical kana orthography (旧仮名遣い kyū kanazukai) and variant kanji forms (異体字 itaiji). For accurate analysis:
+- Consider normalizing historical orthography to modern equivalents before tokenization
+- Document any normalization decisions as they may affect polysemy detection
+- Be aware that inconsistent normalization could artifactually inflate polysemy differences
+
+**Loanword Status**: Many Meiji semantic expansions come from new compound words rather than polysemy of native words:
+- Flag gairaigo (外来語 loanwords) separately in analysis
+- Focus on yamato kotoba (native Japanese) and kango (Sino-Japanese) established before 1600
+- Track whether apparent polysemy increases are from new compounds vs. sense expansion
+
+### Genre and Style Effects
+
+**Genre Distribution**: Different literary genres may confound results:
+- Edo corpus: gesaku (戯作 playful fiction), kabuki (歌舞伎), haikai (俳諧 poetry)
+- Meiji corpus: shōsetsu (小説 modern novel), journalism, translated works
+- **Recommendation**: Consider stratified analysis by genre or balanced sampling
+
+**Register Changes**: The genbun itchi (言文一致) movement unified written and spoken Japanese:
+- Apparent polysemy changes may reflect stylistic shifts rather than semantic expansion
+- Classical literary Japanese vs. modern written style can affect word usage patterns
+
+### Metric Validation
+
+**Polysemy Index**: The composite metric `polysemy_index = n_clusters × (0.5 + 0.5 × normalized_silhouette)` is a practical heuristic, but:
+- The 0.5 weighting is arbitrary; consider alternative metrics
+- Validate against manual sense annotations on a small subset
+- Compare with dictionary-based sense counts (see `data/TARGET_WORDS_METADATA.md`)
+
+**Alternative Approaches**:
+- Entropy over soft cluster assignments
+- DBSCAN for density-based clustering
+- Alignment-based shift scores from diachronic word embeddings
+
+### Sensitivity Analysis
+
+**Era Boundaries**: Semantic shifts were gradual; consider:
+- Sliding window analysis (e.g., 1800-1850 vs. 1870-1920)
+- Narrower sub-periods (late Edo vs. early Meiji)
+- Author birth cohort as a control variable
+
+**Clustering Parameters**:
+- Current range: k=2 to k=10 for K-means
+- Test with expanded range or different algorithms
+- Experiment with distance metrics (cosine vs. Euclidean)
+
+## Validation and Testing
+
+Quick validation with sample data:
+```bash
+python scripts/validate_pipeline.py
+```
+
+This checks:
+- Pipeline component integrity
+- Target word metadata
+- Sample text files
+- Documentation completeness
+
+For detailed validation guidelines, see `data/TARGET_WORDS_METADATA.md`.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

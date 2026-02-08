@@ -38,44 +38,63 @@ class JapaneseTokenizer:
         if not MECAB_AVAILABLE:
             raise ImportError("MeCab is required for tokenization. Install with: pip install mecab-python3")
         
-        # Try to initialize MeCab with proper configuration
-        # First try default initialization
+        self.tagger = self._create_mecab_tagger()
+    
+    def _create_mecab_tagger(self):
+        """
+        Create MeCab tagger with fallback configuration paths.
+        
+        Returns:
+            MeCab.Tagger instance
+            
+        Raises:
+            RuntimeError: If MeCab cannot be initialized
+        """
+        # Try default initialization first
         try:
-            self.tagger = MeCab.Tagger()
+            return MeCab.Tagger()
         except RuntimeError:
-            # If default fails, try common configuration paths
+            pass
+        
+        # Common configuration paths (order matters - most common first)
+        # Can be overridden with MECAB_CONFIG and MECAB_DICT environment variables
+        config_path = os.environ.get('MECAB_CONFIG')
+        dict_path = os.environ.get('MECAB_DICT')
+        
+        if config_path and dict_path:
+            config_paths = [(config_path, dict_path)]
+        else:
             config_paths = [
                 ('/etc/mecabrc', '/var/lib/mecab/dic/ipadic-utf8'),
                 ('/etc/mecabrc', '/usr/share/mecab/dic/ipadic'),
                 ('/usr/local/etc/mecabrc', '/usr/local/lib/mecab/dic/ipadic'),
             ]
-            
-            tagger_created = False
-            for config_path, dict_path in config_paths:
-                if os.path.exists(config_path) and os.path.exists(dict_path):
-                    try:
-                        self.tagger = MeCab.Tagger(f'-r {config_path} -d {dict_path}')
-                        tagger_created = True
-                        break
-                    except RuntimeError:
-                        continue
-            
-            if not tagger_created:
-                # Last resort: try with just dictionary path
-                for _, dict_path in config_paths:
-                    if os.path.exists(dict_path):
-                        try:
-                            self.tagger = MeCab.Tagger(f'-d {dict_path}')
-                            tagger_created = True
-                            break
-                        except RuntimeError:
-                            continue
-                
-                if not tagger_created:
-                    raise RuntimeError(
-                        "Failed to initialize MeCab. Please ensure MeCab is properly installed.\n"
-                        "Install with: sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8"
-                    )
+        
+        # Try with config and dictionary
+        for cfg, dic in config_paths:
+            if os.path.exists(cfg) and os.path.exists(dic):
+                try:
+                    return MeCab.Tagger(f'-r {cfg} -d {dic}')
+                except RuntimeError:
+                    pass
+        
+        # Last resort: try with just dictionary path
+        dict_paths = [path for _, path in config_paths if os.path.exists(path)]
+        for dic in dict_paths:
+            try:
+                return MeCab.Tagger(f'-d {dic}')
+            except RuntimeError:
+                pass
+        
+        # All attempts failed
+        raise RuntimeError(
+            "Failed to initialize MeCab. Please ensure MeCab is properly installed.\n"
+            "Installation instructions:\n"
+            "  - Debian/Ubuntu: sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8\n"
+            "  - macOS: brew install mecab mecab-ipadic\n"
+            "  - Other systems: see https://taku910.github.io/mecab/\n"
+            "You can also set MECAB_CONFIG and MECAB_DICT environment variables."
+        )
     
     def tokenize(self, text: str) -> List[Tuple[str, str]]:
         """

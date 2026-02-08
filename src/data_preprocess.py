@@ -27,6 +27,13 @@ except ImportError:
 
 from utils import setup_logging, ensure_dir, save_json, load_json
 
+# Detect if running in Google Colab (done once at module load)
+try:
+    import google.colab
+    IN_COLAB = True
+except ImportError:
+    IN_COLAB = False
+
 
 class JapaneseTokenizer:
     """
@@ -50,7 +57,22 @@ class JapaneseTokenizer:
         Raises:
             RuntimeError: If MeCab cannot be initialized
         """
-        # Try default initialization first
+        logger = logging.getLogger("edo_meiji_analysis")
+        
+        # Colab fix: explicitly use system mecabrc and ipadic-utf8 dictionary path
+        # mecab-python3 defaults to /usr/local/etc/mecabrc which doesn't exist on Colab
+        if IN_COLAB:
+            try:
+                return MeCab.Tagger('-r /etc/mecabrc -d /var/lib/mecab/dic/ipadic-utf8')
+            except RuntimeError as e:
+                logger.debug(f"Colab MeCab initialization with full path failed, trying config-only fallback: {e}")
+                # Fallback to just config file if full path fails
+                try:
+                    return MeCab.Tagger('-r /etc/mecabrc')
+                except RuntimeError as e:
+                    logger.debug(f"Colab MeCab initialization with config only failed, falling back to default: {e}")
+        
+        # Try default initialization first (for non-Colab environments)
         try:
             return MeCab.Tagger()
         except RuntimeError:

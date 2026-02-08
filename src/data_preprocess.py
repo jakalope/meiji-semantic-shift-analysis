@@ -25,14 +25,14 @@ except ImportError:
     MECAB_AVAILABLE = False
     logging.warning("MeCab not available. Install mecab-python3 for full functionality.")
 
+from utils import setup_logging, ensure_dir, save_json, load_json
+
 # Detect if running in Google Colab (done once at module load)
 try:
     import google.colab
     IN_COLAB = True
 except ImportError:
     IN_COLAB = False
-
-from utils import setup_logging, ensure_dir, save_json, load_json
 
 
 class JapaneseTokenizer:
@@ -65,12 +65,12 @@ class JapaneseTokenizer:
             try:
                 return MeCab.Tagger('-r /etc/mecabrc -d /var/lib/mecab/dic/ipadic-utf8')
             except RuntimeError as e:
-                logger.debug(f"Colab MeCab initialization with full path failed: {e}")
+                logger.debug(f"Colab MeCab initialization with full path failed, trying config-only fallback: {e}")
                 # Fallback to just config file if full path fails
                 try:
                     return MeCab.Tagger('-r /etc/mecabrc')
                 except RuntimeError as e:
-                    logger.debug(f"Colab MeCab initialization with config only failed: {e}")
+                    logger.debug(f"Colab MeCab initialization with config only failed, falling back to default: {e}")
         
         # Try default initialization first (for non-Colab environments)
         try:

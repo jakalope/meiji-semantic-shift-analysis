@@ -14,6 +14,7 @@ import json
 import pickle
 from pathlib import Path
 from typing import Any, Dict, Optional
+import numpy as np
 
 try:
     import torch
@@ -21,6 +22,20 @@ try:
 except ImportError:
     TORCH_AVAILABLE = False
     torch = None
+
+
+class NumpyEncoder(json.JSONEncoder):
+    """Custom JSON encoder that handles numpy types."""
+    def default(self, obj):
+        if isinstance(obj, (np.integer, np.int64, np.int32)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float64, np.float32)):
+            return float(obj)
+        elif isinstance(obj, (np.ndarray,)):
+            return obj.tolist()
+        elif isinstance(obj, (np.bool_,)):
+            return bool(obj)
+        return super().default(obj)
 
 
 def setup_logging(log_file: Optional[str] = None, level: int = logging.INFO) -> logging.Logger:
@@ -96,7 +111,7 @@ def save_json(data: Dict[str, Any], filepath: str) -> None:
     """
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+        json.dump(data, f, ensure_ascii=False, indent=2, cls=NumpyEncoder)
 
 
 def load_json(filepath: str) -> Dict[str, Any]:

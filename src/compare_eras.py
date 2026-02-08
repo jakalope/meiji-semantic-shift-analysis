@@ -145,6 +145,10 @@ class EraComparator:
         )
         merged['cluster_change'] = merged['n_clusters_meiji'] - merged['n_clusters_edo']
         
+        # Add column aliases for notebook compatibility
+        merged['edo_polysemy'] = merged['polysemy_index_edo']
+        merged['meiji_polysemy'] = merged['polysemy_index_meiji']
+        
         # Sort by absolute change
         merged['abs_change'] = merged['polysemy_change'].abs()
         merged = merged.sort_values('abs_change', ascending=False)

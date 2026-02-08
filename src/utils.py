@@ -27,13 +27,13 @@ except ImportError:
 class NumpyEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles numpy types."""
     def default(self, obj):
-        if isinstance(obj, (np.integer, np.int64, np.int32)):
+        if isinstance(obj, np.integer):
             return int(obj)
-        elif isinstance(obj, (np.floating, np.float64, np.float32)):
+        elif isinstance(obj, np.floating):
             return float(obj)
-        elif isinstance(obj, (np.ndarray,)):
+        elif isinstance(obj, np.ndarray):
             return obj.tolist()
-        elif isinstance(obj, (np.bool_,)):
+        elif isinstance(obj, np.bool_):
             return bool(obj)
         return super().default(obj)
 

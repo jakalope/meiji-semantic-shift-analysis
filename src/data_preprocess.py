@@ -37,7 +37,64 @@ class JapaneseTokenizer:
         """Initialize MeCab tokenizer."""
         if not MECAB_AVAILABLE:
             raise ImportError("MeCab is required for tokenization. Install with: pip install mecab-python3")
-        self.tagger = MeCab.Tagger()
+        
+        self.tagger = self._create_mecab_tagger()
+    
+    def _create_mecab_tagger(self):
+        """
+        Create MeCab tagger with fallback configuration paths.
+        
+        Returns:
+            MeCab.Tagger instance
+            
+        Raises:
+            RuntimeError: If MeCab cannot be initialized
+        """
+        # Try default initialization first
+        try:
+            return MeCab.Tagger()
+        except RuntimeError:
+            pass
+        
+        # Common configuration paths (order matters - most common first)
+        # Can be overridden with MECAB_CONFIG and MECAB_DICT environment variables
+        config_path = os.environ.get('MECAB_CONFIG')
+        dict_path = os.environ.get('MECAB_DICT')
+        
+        if config_path and dict_path:
+            config_paths = [(config_path, dict_path)]
+        else:
+            config_paths = [
+                ('/etc/mecabrc', '/var/lib/mecab/dic/ipadic-utf8'),
+                ('/etc/mecabrc', '/usr/share/mecab/dic/ipadic'),
+                ('/usr/local/etc/mecabrc', '/usr/local/lib/mecab/dic/ipadic'),
+            ]
+        
+        # Try with config and dictionary
+        for cfg, dic in config_paths:
+            if os.path.exists(cfg) and os.path.exists(dic):
+                try:
+                    return MeCab.Tagger(f'-r {cfg} -d {dic}')
+                except RuntimeError:
+                    pass
+        
+        # Last resort: try with just dictionary path
+        dict_paths = [path for _, path in config_paths if os.path.exists(path)]
+        for dic in dict_paths:
+            try:
+                return MeCab.Tagger(f'-d {dic}')
+            except RuntimeError:
+                pass
+        
+        # All attempts failed
+        raise RuntimeError(
+            "Failed to initialize MeCab. Please ensure MeCab is properly installed.\n"
+            "Installation instructions:\n"
+            "  - Debian/Ubuntu: sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8\n"
+            "  - macOS: brew install mecab mecab-ipadic\n"
+            "  - Other systems: see https://taku910.github.io/mecab/\n"
+            "You can also set MECAB_CONFIG and MECAB_DICT environment variables."
+        )
     
     def tokenize(self, text: str) -> List[Tuple[str, str]]:
         """

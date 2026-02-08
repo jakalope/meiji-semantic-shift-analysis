@@ -14,7 +14,13 @@ import json
 import pickle
 from pathlib import Path
 from typing import Any, Dict, Optional
-import torch
+
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
 
 
 def setup_logging(log_file: Optional[str] = None, level: int = logging.INFO) -> logging.Logger:
@@ -55,7 +61,7 @@ def setup_logging(log_file: Optional[str] = None, level: int = logging.INFO) -> 
     return logger
 
 
-def get_device(use_cuda: bool = True) -> torch.device:
+def get_device(use_cuda: bool = True) -> 'torch.device':
     """
     Get the appropriate PyTorch device (CPU or CUDA).
     
@@ -65,6 +71,9 @@ def get_device(use_cuda: bool = True) -> torch.device:
     Returns:
         torch.device object
     """
+    if not TORCH_AVAILABLE:
+        raise ImportError("PyTorch is required for this function. Install with: pip install torch")
+    
     if use_cuda and torch.cuda.is_available():
         device = torch.device("cuda")
         logger = logging.getLogger("edo_meiji_analysis")

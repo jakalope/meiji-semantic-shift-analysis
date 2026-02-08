@@ -50,7 +50,26 @@ class JapaneseTokenizer:
         Raises:
             RuntimeError: If MeCab cannot be initialized
         """
-        # Try default initialization first
+        # Detect if running in Google Colab
+        try:
+            import google.colab
+            in_colab = True
+        except ImportError:
+            in_colab = False
+        
+        # Colab fix: explicitly use system mecabrc and ipadic-utf8 dictionary path
+        # mecab-python3 defaults to /usr/local/etc/mecabrc which doesn't exist on Colab
+        if in_colab:
+            try:
+                return MeCab.Tagger('-r /etc/mecabrc -d /var/lib/mecab/dic/ipadic-utf8')
+            except RuntimeError:
+                # Fallback to just config file if full path fails
+                try:
+                    return MeCab.Tagger('-r /etc/mecabrc')
+                except RuntimeError:
+                    pass
+        
+        # Try default initialization first (for non-Colab environments)
         try:
             return MeCab.Tagger()
         except RuntimeError:

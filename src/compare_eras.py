@@ -63,6 +63,10 @@ class EraComparator:
         
         results = {}
         
+        # Sample sizes
+        results['edo_count'] = len(edo_scores)
+        results['meiji_count'] = len(meiji_scores)
+        
         # Descriptive statistics
         results['edo_mean'] = float(np.mean(edo_scores))
         results['edo_std'] = float(np.std(edo_scores))
@@ -79,6 +83,7 @@ class EraComparator:
         t_stat, t_pval = stats.ttest_ind(edo_scores, meiji_scores)
         results['t_statistic'] = float(t_stat)
         results['t_pvalue'] = float(t_pval)
+        results['ttest_pvalue'] = float(t_pval)  # Alias for notebook compatibility
         results['t_significant'] = t_pval < self.alpha
         
         # Mann-Whitney U test (non-parametric)

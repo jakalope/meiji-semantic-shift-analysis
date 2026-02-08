@@ -37,7 +37,45 @@ class JapaneseTokenizer:
         """Initialize MeCab tokenizer."""
         if not MECAB_AVAILABLE:
             raise ImportError("MeCab is required for tokenization. Install with: pip install mecab-python3")
-        self.tagger = MeCab.Tagger()
+        
+        # Try to initialize MeCab with proper configuration
+        # First try default initialization
+        try:
+            self.tagger = MeCab.Tagger()
+        except RuntimeError:
+            # If default fails, try common configuration paths
+            config_paths = [
+                ('/etc/mecabrc', '/var/lib/mecab/dic/ipadic-utf8'),
+                ('/etc/mecabrc', '/usr/share/mecab/dic/ipadic'),
+                ('/usr/local/etc/mecabrc', '/usr/local/lib/mecab/dic/ipadic'),
+            ]
+            
+            tagger_created = False
+            for config_path, dict_path in config_paths:
+                if os.path.exists(config_path) and os.path.exists(dict_path):
+                    try:
+                        self.tagger = MeCab.Tagger(f'-r {config_path} -d {dict_path}')
+                        tagger_created = True
+                        break
+                    except RuntimeError:
+                        continue
+            
+            if not tagger_created:
+                # Last resort: try with just dictionary path
+                for _, dict_path in config_paths:
+                    if os.path.exists(dict_path):
+                        try:
+                            self.tagger = MeCab.Tagger(f'-d {dict_path}')
+                            tagger_created = True
+                            break
+                        except RuntimeError:
+                            continue
+                
+                if not tagger_created:
+                    raise RuntimeError(
+                        "Failed to initialize MeCab. Please ensure MeCab is properly installed.\n"
+                        "Install with: sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8"
+                    )
     
     def tokenize(self, text: str) -> List[Tuple[str, str]]:
         """

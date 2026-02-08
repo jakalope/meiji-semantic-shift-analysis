@@ -136,6 +136,8 @@ python src/compare_eras.py \
 
 ## Interactive Analysis
 
+### Local Jupyter Notebook
+
 Launch the Jupyter notebook for interactive exploration:
 
 ```bash
@@ -147,6 +149,29 @@ The notebook provides:
 - Statistical analysis
 - Custom plots and comparisons
 - Case studies of specific words
+
+### Google Colab (Recommended for Quick Start)
+
+Run the complete pipeline in Google Colab without local setup:
+
+1. **Open the notebook**:
+   - Navigate to [notebooks/google_colab_pipeline.ipynb](notebooks/google_colab_pipeline.ipynb)
+   - Click "Open in Colab" button
+   - Or use: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jakalope/meiji-semantic-shift-analysis/blob/main/notebooks/google_colab_pipeline.ipynb)
+
+2. **Run the pipeline**:
+   - Execute cells in order (Runtime > Run all)
+   - First run will download BERT model (~400MB)
+   - Results are saved to your Google Drive
+
+3. **Benefits**:
+   - No local installation required
+   - Free GPU access for faster processing
+   - Automatic Python path setup (fixes import issues)
+   - Persistent storage in Google Drive
+   - Runs on sample data out-of-the-box
+
+**Note**: The Colab notebook automatically handles the Python path issue by adding `src/` to `sys.path`, eliminating the need for manual PYTHONPATH configuration.
 
 ## Interpreting Results
 

@@ -80,12 +80,27 @@ python src/polysemy_clustering.py --input data/embeddings --output results/polys
 python src/compare_eras.py --input results/polysemy_scores.csv --output results/comparison.json
 ```
 
-### Jupyter Notebook
+### Jupyter Notebooks
 
 Explore results interactively:
 ```bash
 jupyter notebook notebooks/exploratory_analysis.ipynb
 ```
+
+### Google Colab
+
+Run the complete pipeline in Google Colab with GPU acceleration:
+
+1. Open [google_colab_pipeline.ipynb](notebooks/google_colab_pipeline.ipynb) in Google Colab
+2. Or directly: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jakalope/meiji-semantic-shift-analysis/blob/main/notebooks/google_colab_pipeline.ipynb)
+3. Follow the step-by-step instructions in the notebook
+
+**Features:**
+- Automatic dependency installation
+- Google Drive integration for persistence
+- Fixes Python path issues (no need to manually add `src/` to path)
+- Runs on sample data out-of-the-box
+- Includes result visualization
 
 ## Project Structure
 
@@ -106,7 +121,8 @@ meiji-semantic-shift-analysis/
 │   ├── edo/              # Edo period texts
 │   └── meiji/            # Meiji period texts
 ├── notebooks/
-│   └── exploratory_analysis.ipynb  # Jupyter notebook for visualization
+│   ├── exploratory_analysis.ipynb  # Interactive result exploration
+│   └── google_colab_pipeline.ipynb # Complete pipeline for Google Colab
 ├── scripts/
 │   └── run_pipeline.sh   # Bash script to run full workflow
 └── results/              # Output files (gitignored)
